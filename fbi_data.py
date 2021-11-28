@@ -7,64 +7,6 @@ import os
 import csv
 import sqlite3
 
-
-# url = "https://api.usa.gov/crime/fbi/sapi/"
-
-# querystring = {"api":"api", "nibrs":"nibrs", "offense":"robbery", "national":"national", "variable":"age"}
-
-# params = {"api_key":"m4AGJ3DCZqhmgqCJrJd5cczZPtTSl6DmUrkRLJIX"}
-
-# response = requests.request("GET", url, headers=headers)
-
-# response = requests.get("https://api.usa.gov/crime/fbi/sapi/m4AGJ3DCZqhmgqCJrJd5cczZPtTSl6DmUrkRLJIX")
-
-# api_key = 'm4AGJ3DCZqhmgqCJrJd5cczZPtTSl6DmUrkRLJIX'
-# offense = 'rape'
-# variable = 'age'
-
-# url = f'https://crime-data-explorer.fr.cloud.gov/pages/docApi/api/nibrs/{offense}/offender/national/{variable}'
-
-# url = f"https://crime-data-explorer.fr.cloud.gov/pages/docApi/v1.json?limit=1&api_key={api_key}&"
-
-# url = f'https://{api_key}@crime-data-explorer.fr.cloud.gov/pages/docApi'
-
-# response = requests.get(url)
-
-# print(response.status_code)
-# print(response.text)
-
-
-# import requests
-
-# url = "https://jailbase-jailbase.p.rapidapi.com/recent/"
-
-# querystring = {"source_id":"<REQUIRED>"}
-
-# headers = {
-#     'x-rapidapi-key': "SIGN-UP-FOR-KEY",
-#     'x-rapidapi-host': "jailbase-jailbase.p.rapidapi.com"
-#     }
-
-# response = requests.request("GET", url, headers=headers, params=querystring)
-
-# print(response.text)
-
-# params = {"field_offices":"washingtondc"}
-
-# print(response.status_code)
-# print(response.text)
-
-# print(data)
-
-# print(data['total'])
-# print(len(data['items']))
-# print(data.keys())
-
-# print(len(data))
-# print(data['items'][11])
-
-
-
 # url = "https://api.usa.gov/crime/fbi/sapi/api/data/nibrs/rape/offender/national/race?api_key=m4AGJ3DCZqhmgqCJrJd5cczZPtTSl6DmUrkRLJIX"
 
 # response = requests.get(url)
