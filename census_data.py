@@ -87,3 +87,5 @@ states = list(states_dict.keys())
 print(state_data_from_search(states[0]))
 print('\n')
 print(state_data_from_search('AL'))
+
+print(states)
