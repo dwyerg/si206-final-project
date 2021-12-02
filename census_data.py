@@ -17,9 +17,16 @@ def set_census_table(cur, conn):
     cur.execute("CREATE TABLE IF NOT EXISTS Census (stateid INTEGER PRIMARY KEY,state TEXT, black PERCENT, native PERCENT, asian PERCENT, islander PERCENT, multiracial PERCENT, hispaniclatino PERCENT, white PERCENT)")
     conn.commit()
 
+"""sets up the table with the census data"""
+def set_states_table(cur, conn):
+    cur.execute("CREATE TABLE IF NOT EXISTS States (stateid INTEGER PRIMARY KEY, abbreviation TEXT, type TEXT)")
+    conn.commit()
+    
 """scrapes a website to get data for a dictionary of the states
-to get a number id for each state in alphabetical order
-https://www.owogram.com/us-states-alphabetical-order/"""
+to get a unique number id for each state in alphabetical order
+https://www.owogram.com/us-states-alphabetical-order/
+
+ids 1 - 50 are for population data, 51 - 100 are for poverty data"""
 def numbered_states():
     url = 'https://www.owogram.com/us-states-alphabetical-order/'
     r = requests.get(url)
@@ -42,19 +49,13 @@ def numbered_states():
         if state == 'en':
             state = 'TN'
         
-        states[state] = int(id)
+        states[int(id)] = state
+
+    for i in range(51,101):
+        id = i - 50
+        states[i] = states.get(id)
         
     return states
-
-"""uses states dictionary to create another dictionary for
-the state poverty data to use as primary key"""
-def poverty_state_ids(states):
-    out = {}
-
-    for key in states:
-        out[key] = states[key] + 50
-
-    return out
 
 """
 function to collect data into a dictionary from quick facts page of census for each state
@@ -62,7 +63,7 @@ in list of tuples
 [(DEMOGRAPHIC, PERCENT), (DEMOGRAPHIC, PERCENT), (DEMOGRAPHIC, PERCENT), (DEMOGRAPHIC, PERCENT)]
 https://www.census.gov/quickfacts/fact/table/[STATE]/PST045219
 """
-def race_data_from_search(state):
+def population_data(state):
     url = f'https://www.census.gov/quickfacts/fact/table/{state}/PST045219'
     r = requests.get(url)
     soup = BeautifulSoup(r.text, 'html.parser')
@@ -120,41 +121,28 @@ def poverty_data_from_csv(states):
 
     #states[i] : {white:%, black:%, hispanic:%, asian:%, native:%, multiracial:%}"""
 
-"""TO DO: add states + ids to database"""
+"""TO DO: add stats to database"""
 
-"""TO DO: add data to database"""
-def add_criminal(cur, conn, totalrates, povertyrates):
-    response = requests.get('https://api.fbi.gov/wanted/v1/list')
-    data = json.loads(response.content)
-    criminal_id = 0
-
-    for item in data['items']:
-        criminal_id += 1
-        name = item['title']
-        if item['dates_of_birth_used'] == None:
-            dob_used = "no dob"
+"""add state id and abbreviations to database"""
+def add_states(cur, conn, states):
+    for id in states.keys():
+        if id < 51:
+            label = 'population stats'
         else:
-            dob_used = item['dates_of_birth_used'][0]
-        race = item['race']
-        if item['field_offices'] == None:
-            field_office = "no location"
-        else:
-            field_office = item['field_offices'][0]
-        sex = item['sex']
-        crimes = item['description']
-        reward = item['reward_text']
-   
-        cur.execute("INSERT INTO Criminals (criminal_id, name, dob_used, race, field_office, sex, crimes, reward) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (criminal_id, name, dob_used, race, field_office, sex, crimes, reward))
+            label = 'poverty stats'
+        
+        cur.execute("INSERT OR REPLACE INTO States (stateid, abbreviation, type) VALUES (?, ?, ?)", (id, states[id], label))
 
     conn.commit()
 
 def main():
+    states_dict = numbered_states()
+    states_names = list(states_dict.values())[:50]
+    poverty_list = poverty_data_from_csv(states_names)
+
     cur, conn = setUpDatabase("census_data.db")
     set_census_table(cur, conn)
-
-    states_dict = numbered_states()
-    poverty_states_dict = poverty_state_ids(states_dict)
-    states = list(states_dict.keys())
-    poverty_list = poverty_data_from_csv(states)
+    set_states_table(cur, conn)
+    add_states(cur, conn, states_dict)
 
 main()
