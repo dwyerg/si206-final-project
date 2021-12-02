@@ -12,10 +12,7 @@ def setUpDatabase(db_name):
     cur = conn.cursor()
     return cur, conn
 
-"""sets up the table with the census data"""
-def set_census_table(cur, conn):
-    cur.execute("CREATE TABLE IF NOT EXISTS Census (stateid INTEGER PRIMARY KEY,state TEXT, black PERCENT, native PERCENT, asian PERCENT, islander PERCENT, multiracial PERCENT, hispaniclatino PERCENT, white PERCENT)")
-    conn.commit()
+
 
 """sets up the table with the census data"""
 def set_states_table(cur, conn):
@@ -24,9 +21,8 @@ def set_states_table(cur, conn):
     
 """scrapes a website to get data for a dictionary of the states
 to get a unique number id for each state in alphabetical order
-https://www.owogram.com/us-states-alphabetical-order/
-
-ids 1 - 50 are for population data, 51 - 100 are for poverty data"""
+ids 1 - 50 are for population data, 51 - 100 are for poverty data
+https://www.owogram.com/us-states-alphabetical-order/"""
 def numbered_states():
     url = 'https://www.owogram.com/us-states-alphabetical-order/'
     r = requests.get(url)
@@ -56,6 +52,25 @@ def numbered_states():
         states[i] = states.get(id)
         
     return states
+
+"""add state id and abbreviations to database"""
+def add_states(cur, conn, states):
+    for id in states.keys():
+        if id < 51:
+            label = 'population stats'
+        else:
+            label = 'poverty stats'
+        
+        cur.execute("INSERT OR REPLACE INTO States (stateid, abbreviation, type) VALUES (?, ?, ?)", (id, states[id], label))
+
+    conn.commit()
+
+
+
+"""sets up the table with the census data"""
+def set_census_table(cur, conn):
+    cur.execute("CREATE TABLE IF NOT EXISTS Census (stateid INTEGER PRIMARY KEY,state TEXT, black PERCENT, native PERCENT, asian PERCENT, islander PERCENT, multiracial PERCENT, hispaniclatino PERCENT, white PERCENT)")
+    conn.commit()
 
 """
 function to collect data into a dictionary from quick facts page of census for each state
@@ -122,18 +137,6 @@ def poverty_data_from_csv(states):
     #states[i] : {white:%, black:%, hispanic:%, asian:%, native:%, multiracial:%}"""
 
 """TO DO: add stats to database"""
-
-"""add state id and abbreviations to database"""
-def add_states(cur, conn, states):
-    for id in states.keys():
-        if id < 51:
-            label = 'population stats'
-        else:
-            label = 'poverty stats'
-        
-        cur.execute("INSERT OR REPLACE INTO States (stateid, abbreviation, type) VALUES (?, ?, ?)", (id, states[id], label))
-
-    conn.commit()
 
 def main():
     states_dict = numbered_states()
