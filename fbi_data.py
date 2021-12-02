@@ -22,7 +22,7 @@ def setUpDatabase(db_name):
     return cur, conn
 
 def create_criminal_table(cur, conn):
-    cur.execute("CREATE TABLE IF NOT EXISTS Criminals (name TEXT PRIMARY KEY, dob_used TEXT, race TEXT, field_office TEXT, sex TEXT, crimes TEXT, reward INTEGER)")
+    cur.execute("CREATE TABLE IF NOT EXISTS Criminals (name TEXT PRIMARY KEY, dob_used TEXT, race TEXT, field_office TEXT, state INTEGER, sex TEXT, crimes TEXT, reward INTEGER)")
     conn.commit()
     # make criminal_id into INTEGER PRIMARY KEY
 
@@ -43,15 +43,16 @@ def add_criminals(cur, conn):
             else:
                 dob_used = item['dates_of_birth_used'][0]
             race = item['race']
-            if item['field_offices'] == None:
+            if item['field_offices'] == None or item['field_offices'] == 'washingtondc':
                 continue
             else:
                 field_office = item['field_offices'][0]
+            
             sex = item['sex']
             crimes = item['description']
             reward = item['reward_text']
     
-            cur.execute("INSERT OR IGNORE INTO Criminals (name, dob_used, race, field_office, sex, crimes, reward) VALUES (?, ?, ?, ?, ?, ?, ?)", (name, dob_used, race, field_office, sex, crimes, reward))
+            cur.execute("INSERT OR IGNORE INTO Criminals (name, dob_used, race, field_office, state, sex, crimes, reward) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (name, dob_used, race, field_office, state, sex, crimes, reward))
 
     conn.commit()
 
@@ -62,9 +63,18 @@ def get_field_offices(cur, conn):
     for office in offices:
         if office not in field_offices:
             field_offices[office[0]] = ""
-    print(field_offices)
+
+def create_state_table(cur, conn):
+    cur.execute("CREATE TABLE IF NOT EXISTS States (state_id AUTO_INCREMENT INTEGER PRIMARY KEY, state_abbr TEXT)")
+    for state in states.items():
+        cur.execute("INSERT OR IGNORE INTO States (state_id, state_abbr) VALUES (?, ?)", (state))
+
+    conn.commit()
+
+
 
 cur, conn = setUpDatabase("FBI_data.db")
+states = {'tampa': 'FL', 'philadelphia': 'PA', 'jacksonville': 'FL', 'albuquerque': 'NM', 'losangeles': 'CA', 'miami': 'FL', 'sanjuan': 'UT', 'cleveland': 'OH', 'newhaven': 'CT', 'seattle': 'WA', 'cincinnati': 'OH', 'portland': 'OR', 'phoenix': 'AZ', 'dallas': 'TX', 'minneapolis': 'MN', 'chicago': 'IL', 'newark': 'NJ', 'sanfrancisco': 'CA', 'newyork': 'NY', 'sacramento': 'CA', 'saltlakecity': 'UT', 'lasvegas': 'NV', 'louisville': 'KY', 'boston': 'MA', 'houston': 'TX', 'omaha': 'NE', 'pittsburgh': 'PA', 'atlanta': 'GA', 'columbia': 'SC', 'albany': 'NY', 'kansascity': 'KS', 'denver': 'CO', 'mobile': 'AL', 'buffalo': 'NY', 'elpaso': 'TX', 'littlerock': 'AR', 'sandiego': 'CA', 'detroit': 'MI', 'milwaukee': 'WI', 'richmond': 'VA', 'baltimore': 'MD', 'neworleans': 'LA', 'charlotte': 'NC', 'indianapolis': 'IN', 'oklahomacity': 'OK', 'norfolk': 'VA', 'stlouis': 'MO', 'knoxville': 'TN', 'birmingham': 'AL', 'springfield': 'OR', 'memphis': 'TN', 'jackson': 'MS', 'honolulu': 'HI', 'sanantonio': 'TX'}
 # create_criminal_table(cur, conn)
 # add_criminals(cur, conn)
 get_field_offices(cur, conn)
