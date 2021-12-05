@@ -191,7 +191,7 @@ def female_population_data(state):
 """add stats to database"""
 def add_population_data(cur, conn, data, states):
     #overall stats
-    for i in range(0,50):
+    for i in range(len(states)):
             curr = data[i][0]
             stateid = states[i]
             black = curr['black']
@@ -208,7 +208,7 @@ def add_population_data(cur, conn, data, states):
 
 def add_female_data(cur, conn, data, states):
     #female stats
-    for i in range(0,50):
+    for i in range(len(states)):
         curr = data[i][0]
         stateid = states[i]
         black = curr['black']
@@ -225,7 +225,7 @@ def add_female_data(cur, conn, data, states):
 
 def add_poverty_data(cur, conn, data, states):
     #poverty stats
-    for i in range(0, 50):
+    for i in range(len(states)):
         curr = data[i]
         stateid = states[i]
         black = curr['black']
@@ -260,11 +260,11 @@ def main():
         female_list.append(female)
 
     cur, conn = setUpDatabase("census_data.db")
-    #set_census_table(cur, conn)
-    #set_states_table(cur, conn)
-    #add_states(cur, conn, states_dict)
-    add_population_data(cur, conn, population_list, all_state_ids)
-    add_poverty_data(cur, conn, poverty_list, all_state_ids)
-    add_female_data(cur, conn, female_list, all_state_ids)
+    set_census_table(cur, conn)
+    set_states_table(cur, conn)
+    add_states(cur, conn, states_dict)
+    add_population_data(cur, conn, population_list, totalracedata)
+    add_poverty_data(cur, conn, poverty_list, povertydata)
+    add_female_data(cur, conn, female_list, femaledata)
 
 main()
