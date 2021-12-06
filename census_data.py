@@ -291,7 +291,7 @@ def main():
     recent_data = population_data_2020(recentraceids)
     old_data = population_data_2018(oldraceids)
 
-    cur, conn = setUpDatabase("census_data.db")
+    cur, conn = setUpDatabase("main_data.db")
     set_census_table(cur, conn)
     set_states_table(cur, conn)
     add_states(cur, conn, states_dict)
@@ -299,38 +299,3 @@ def main():
     add_poverty_data(cur, conn, poverty_data, povertyids)
 
 main()
-
-
-"""OLD NUMBERED STATES FUNCTION"""
-"""url = 'https://www.owogram.com/us-states-alphabetical-order/'
-r = requests.get(url)
-soup = BeautifulSoup(r.text, 'html.parser')
-tags = soup.find_all('h3', class_="ftwp-heading")
-
-states = {}
-
-for tag in tags:
-    header = tag.text.split('.')
-    id = header[0]
-    #end after all 50 are collected
-    if id == 'US States and Capitals Chart':
-        break
-    state = header[1].split()[-1][1:3]
-    
-    #website messed up for wisconsin and tennessee.
-    if state == 'is':
-        state = 'WI'
-    if state == 'en':
-        state = 'TN'
-    
-    states[int(id)] = state.upper()
-
-for i in range(51,101):
-    id = i - 50
-    states[i] = states.get(id)
-
-for i in range(101,151):
-    id = i - 100
-    states[i] = states.get(id)
-    
-return states"""
