@@ -42,23 +42,23 @@ def add_criminals(cur, conn, states):
     if num_rows < 20:
         page = 1
     elif num_rows < 40:
-        page = 2
-    elif num_rows < 60:
         page = 3
-    elif num_rows < 80:
-        page = 4
-    elif num_rows < 100:
+    elif num_rows < 60:
         page = 5
-    elif num_rows < 120:
-        page = 6
-    elif num_rows < 140:
+    elif num_rows < 80:
         page = 7
-    elif num_rows < 160:
-        page = 8
-    elif num_rows < 180:
+    elif num_rows < 100:
         page = 9
+    elif num_rows < 120:
+        page = 11
+    elif num_rows < 140:
+        page = 13
+    elif num_rows < 160:
+        page = 15
+    elif num_rows < 180:
+        page = 17
     elif num_rows < 190:
-        page = 10
+        page = 19
 
     params={'page': page}
     response = requests.get('https://api.fbi.gov/wanted/v1/list', params=params)
@@ -80,10 +80,8 @@ def add_criminals(cur, conn, states):
             state = None
         else:
             field_office = item['field_offices'][0]
-            print(field_office)
             cur.execute("SELECT States.stateid FROM States WHERE States.abbreviation = ?", (states[item['field_offices'][0]],))
             state = int(cur.fetchone()[0])
-            print(state)
         sex = item['sex']
         crimes = item['description']
         reward_ = re.findall(r'\$(\S+)', str(item['reward_text']))
@@ -110,6 +108,7 @@ def get_field_offices(cur, conn):
 def main():
     cur, conn = setUpDatabase("main_data.db")
     states = {'washingtondc': 'DC', 'tampa': 'FL', 'philadelphia': 'PA', 'jacksonville': 'FL', 'albuquerque': 'NM', 'losangeles': 'CA', 'miami': 'FL', 'sanjuan': 'UT', 'cleveland': 'OH', 'newhaven': 'CT', 'seattle': 'WA', 'cincinnati': 'OH', 'portland': 'OR', 'phoenix': 'AZ', 'dallas': 'TX', 'minneapolis': 'MN', 'chicago': 'IL', 'newark': 'NJ', 'sanfrancisco': 'CA', 'newyork': 'NY', 'sacramento': 'CA', 'saltlakecity': 'UT', 'lasvegas': 'NV', 'louisville': 'KY', 'boston': 'MA', 'houston': 'TX', 'omaha': 'NE', 'pittsburgh': 'PA', 'atlanta': 'GA', 'columbia': 'SC', 'albany': 'NY', 'kansascity': 'KS', 'denver': 'CO', 'mobile': 'AL', 'buffalo': 'NY', 'elpaso': 'TX', 'littlerock': 'AR', 'sandiego': 'CA', 'detroit': 'MI', 'milwaukee': 'WI', 'richmond': 'VA', 'baltimore': 'MD', 'neworleans': 'LA', 'charlotte': 'NC', 'indianapolis': 'IN', 'oklahomacity': 'OK', 'norfolk': 'VA', 'stlouis': 'MO', 'knoxville': 'TN', 'birmingham': 'AL', 'springfield': 'OR', 'memphis': 'TN', 'jackson': 'MS', 'honolulu': 'HI', 'sanantonio': 'TX'}
+    # cur.execute("DROP TABLE Criminals")
     # state_abbr = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VE', 'VI', 'WA', 'WV', 'WI', 'WY']
     #Alabama is Al not AL in Huda's code
     # create_state_table(cur, conn, states, state_abbr)
@@ -120,4 +119,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
