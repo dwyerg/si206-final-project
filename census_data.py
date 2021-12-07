@@ -39,6 +39,8 @@ def numbered_states():
     return out
 
 """
+input: unique state ids
+output: list of dicts with demographics per state
 function to collect 2018 data into a list of dictionaries
 [statid:{WHITE:%, BLACK:%, NATIVE:%, HISPANICLATINO:%, ASIAN:%}, statid:{WHITE:%, BLACK:%, NATIVE:%, HISPANICLATINO:%, ASIAN:%}, statid:{WHITE:%, BLACK:%, NATIVE:%, HISPANICLATINO:%, ASIAN:%}]
 https://en.wikipedia.org/wiki/Historical_racial_and_ethnic_demographics_of_the_United_States
@@ -116,6 +118,8 @@ def population_data_2018(ids):
     return out
 
 """
+input: unique state ids
+output: list of dicts with demographics per state
 function to collect 2020 data into a list of dictionaries
 [statid:{WHITE:%, BLACK:%, NATIVE:%, HISPANICLATINO:%, ASIAN:%}, statid:{WHITE:%, BLACK:%, NATIVE:%, HISPANICLATINO:%, ASIAN:%}, statid:{WHITE:%, BLACK:%, NATIVE:%, HISPANICLATINO:%, ASIAN:%}]
 https://en.wikipedia.org/wiki/Historical_racial_and_ethnic_demographics_of_the_United_States
@@ -193,6 +197,8 @@ def population_data_2020(ids):
     return out
 
 """
+input: unique state ids
+output: list of dicts with percentages for each demographic per state
 takes in list of state abbreviations and list of state ids
 function to use csv file of data on poverty rates
 returns a list of dicts for each state
@@ -220,7 +226,7 @@ def poverty_data_from_csv(states):
 
     return out
 
-"""add state id and abbreviations to database"""
+"""add state id and abbreviations to state table with state names and ids to serve as key in database"""
 def add_states(cur, conn, states):
     for id in states.keys():
         if id < 51:
@@ -234,7 +240,7 @@ def add_states(cur, conn, states):
 
     conn.commit()
 
-"""add poverty stats to database"""
+"""add poverty stats to census table in database"""
 def add_poverty_data(cur, conn, data, states):
     #poverty stats
     for i in range(len(states)):
@@ -250,7 +256,7 @@ def add_poverty_data(cur, conn, data, states):
     
     conn.commit()
 
-"""add 2018 and 2020 stats to database"""
+"""add 2018 and 2020 stats to census table database"""
 def add_population_data(cur, conn, olddata, recentdata):
     #2018 stats
     i = 0
@@ -281,21 +287,28 @@ def add_population_data(cur, conn, olddata, recentdata):
     conn.commit()
 
 def main():
+    #SET UP STATE IDS
     states_dict = numbered_states()
     all_state_ids = list(states_dict.keys())
     recentraceids = all_state_ids[:51]
     oldraceids = all_state_ids[51:102]
     povertyids = all_state_ids[102:152]
 
+    #SCRAPE DATA INTO LISTS
     poverty_data = poverty_data_from_csv(povertyids)
     recent_data = population_data_2020(recentraceids)
     old_data = population_data_2018(oldraceids)
 
-    cur, conn = setUpDatabase("main_data.db")
+    #PUT DATA IN DATABASE
+    """cur, conn = setUpDatabase("main_data.db")
     set_census_table(cur, conn)
     set_states_table(cur, conn)
     add_states(cur, conn, states_dict)
     add_population_data(cur, conn, old_data, recent_data)
-    add_poverty_data(cur, conn, poverty_data, povertyids)
+    add_poverty_data(cur, conn, poverty_data, povertyids)"""
+
+    #CALCULATE DATA
+
+    #VISUALIZATIONS
 
 main()
