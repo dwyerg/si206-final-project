@@ -17,15 +17,6 @@ def create_criminal_table(cur, conn):
     cur.execute("CREATE TABLE IF NOT EXISTS Criminals (name TEXT PRIMARY KEY, dob_used TEXT, race TEXT, field_office TEXT, state INTEGER, sex TEXT, crimes TEXT, reward INTEGER)")
     conn.commit()
 
-# def create_state_table(cur, conn, states, state_abbr):
-#     cur.execute("CREATE TABLE IF NOT EXISTS States (state_id INTEGER PRIMARY KEY, state_abbr TEXT)")
-#     state_id = 1
-
-#     for state in state_abbr:
-#         cur.execute("INSERT OR IGNORE INTO States (state_id, state_abbr) VALUES (?, ?)", (state_id, state))
-#         state_id += 1
-#     conn.commit()
-
 def create_race_table(cur, conn):
     cur.execute("CREATE TABLE IF NOT EXISTS Races (race_id INTEGERY PRIMARY KEY, race TEXT)")
     race_id = 1
@@ -101,21 +92,32 @@ def get_field_offices(cur, conn):
     for office in offices:
         if office not in field_offices:
             field_offices[office[0]] = ""
+    return field_offices
+
+def criminals_by_state(cur, conn, filename):
+    with open(filename, 'w') as fileout:
+        fileout.write('STATE_ABBREVIATION,TOTAL_CRIMINALS\n')
+        for i in range(0, 51):
+            cur.execute("SELECT States.abbreviation FROM Criminals JOIN States ON Criminals.state = States.stateid WHERE Criminals.state = ?", (i,))
+            tot = cur.fetchall()
+            if len(tot) == 0:
+                continue
+            else:
+                fileout.write(str(tot[0][0]) + ',' + str(len(tot)) + '\n')
 
 
 
 
 def main():
     cur, conn = setUpDatabase("main_data.db")
-    states = {'washingtondc': 'DC', 'tampa': 'FL', 'philadelphia': 'PA', 'jacksonville': 'FL', 'albuquerque': 'NM', 'losangeles': 'CA', 'miami': 'FL', 'sanjuan': 'UT', 'cleveland': 'OH', 'newhaven': 'CT', 'seattle': 'WA', 'cincinnati': 'OH', 'portland': 'OR', 'phoenix': 'AZ', 'dallas': 'TX', 'minneapolis': 'MN', 'chicago': 'IL', 'newark': 'NJ', 'sanfrancisco': 'CA', 'newyork': 'NY', 'sacramento': 'CA', 'saltlakecity': 'UT', 'lasvegas': 'NV', 'louisville': 'KY', 'boston': 'MA', 'houston': 'TX', 'omaha': 'NE', 'pittsburgh': 'PA', 'atlanta': 'GA', 'columbia': 'SC', 'albany': 'NY', 'kansascity': 'KS', 'denver': 'CO', 'mobile': 'AL', 'buffalo': 'NY', 'elpaso': 'TX', 'littlerock': 'AR', 'sandiego': 'CA', 'detroit': 'MI', 'milwaukee': 'WI', 'richmond': 'VA', 'baltimore': 'MD', 'neworleans': 'LA', 'charlotte': 'NC', 'indianapolis': 'IN', 'oklahomacity': 'OK', 'norfolk': 'VA', 'stlouis': 'MO', 'knoxville': 'TN', 'birmingham': 'AL', 'springfield': 'OR', 'memphis': 'TN', 'jackson': 'MS', 'honolulu': 'HI', 'sanantonio': 'TX'}
+    # states = {'washingtondc': 'DC', 'tampa': 'FL', 'philadelphia': 'PA', 'jacksonville': 'FL', 'albuquerque': 'NM', 'losangeles': 'CA', 'miami': 'FL', 'sanjuan': 'UT', 'cleveland': 'OH', 'newhaven': 'CT', 'seattle': 'WA', 'cincinnati': 'OH', 'portland': 'OR', 'phoenix': 'AZ', 'dallas': 'TX', 'minneapolis': 'MN', 'chicago': 'IL', 'newark': 'NJ', 'sanfrancisco': 'CA', 'newyork': 'NY', 'sacramento': 'CA', 'saltlakecity': 'UT', 'lasvegas': 'NV', 'louisville': 'KY', 'boston': 'MA', 'houston': 'TX', 'omaha': 'NE', 'pittsburgh': 'PA', 'atlanta': 'GA', 'columbia': 'SC', 'albany': 'NY', 'kansascity': 'KS', 'denver': 'CO', 'mobile': 'AL', 'buffalo': 'NY', 'elpaso': 'TX', 'littlerock': 'AR', 'sandiego': 'CA', 'detroit': 'MI', 'milwaukee': 'WI', 'richmond': 'VA', 'baltimore': 'MD', 'neworleans': 'LA', 'charlotte': 'NC', 'indianapolis': 'IN', 'oklahomacity': 'OK', 'norfolk': 'VA', 'stlouis': 'MO', 'knoxville': 'TN', 'birmingham': 'AL', 'springfield': 'OR', 'memphis': 'TN', 'jackson': 'MS', 'honolulu': 'HI', 'sanantonio': 'TX'}
     # cur.execute("DROP TABLE Criminals")
-    # state_abbr = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VE', 'VI', 'WA', 'WV', 'WI', 'WY']
-    #Alabama is Al not AL in Huda's code
-    # create_state_table(cur, conn, states, state_abbr)
-    create_criminal_table(cur, conn)
-    create_race_table(cur, conn)
-    add_criminals(cur, conn, states)
+    # create_criminal_table(cur, conn)
+    # create_race_table(cur, conn)
+    # add_criminals(cur, conn, states)
     # get_field_offices(cur, conn)
+
+    criminals_by_state(cur, conn, 'criminals_by_state.txt')
 
 if __name__ == '__main__':
     main()
