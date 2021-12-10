@@ -350,6 +350,8 @@ def write_calculations (cur, filename):
             fileout.write('\n\n')
 
 def main():
+    cur, conn = setUpDatabase("main_data.db")
+
     #SET UP STATE IDS
     """states_dict = numbered_states()
     all_state_ids = list(states_dict.keys())
@@ -357,21 +359,20 @@ def main():
     oldraceids = all_state_ids[51:102]
     povertyids = all_state_ids[102:152]"""
 
-    #SCRAPE DATA INTO LISTS
+    #SCRAPE DATA FROM WEBSITES INTO LISTS
     """poverty_data = poverty_data_from_csv(povertyids)
     recent_data = population_data_2020(recentraceids)
     old_data = population_data_2018(oldraceids)"""
 
-    #PUT DATA IN DATABASE
-    cur, conn = setUpDatabase("main_data.db")
+    #SET UP TABLES AND PUT SCRAPED DATA IN DATABASE
     """set_census_table(cur, conn)
     set_states_table(cur, conn)
     add_states(cur, conn, states_dict)
     add_population_data(cur, conn, old_data, recent_data)
     add_poverty_data(cur, conn, poverty_data, povertyids)"""
 
-    #CALCULATE DATA
-    write_calculations (cur, 'race_stats.txt')
+    #CALCULATE DATA AND WRITE TO TXT FILE
+    """write_calculations (cur, 'race_stats.txt')"""
 
     #VISUALIZATIONS
 
