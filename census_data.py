@@ -286,28 +286,92 @@ def add_population_data(cur, conn, olddata, recentdata):
     
     conn.commit()
 
+"""calculates difference between poverty and general population stats for each racial group (poverty% - population%)
+for California and New York (the 2 states with the most criminals) and writes the calculations into a txt file"""
+def write_calculations (cur, filename):
+    #POVERTY DATA (not enough data for natives in these states)
+    #for California
+    cur.execute("SELECT white, black, hispaniclatino, asian FROM Census WHERE stateid = 106")
+    ca_povertydata = cur.fetchall()
+    ca_povertystats = {'white':"{:.0%}".format(ca_povertydata[0][0]),
+                    'black':"{:.0%}".format(ca_povertydata[0][1]),
+                    'latino':"{:.0%}".format(ca_povertydata[0][2]),
+                    'asian':"{:.0%}".format(ca_povertydata[0][3])}
+
+    #for New York
+    cur.execute("SELECT white, black, hispaniclatino, asian FROM Census WHERE stateid = 133")
+    ny_povertydata = cur.fetchall()
+    ny_povertystats = {'white':"{:.0%}".format(ny_povertydata[0][0]),
+                    'black':"{:.0%}".format(ny_povertydata[0][1]),
+                    'latino':"{:.0%}".format(ny_povertydata[0][2]),
+                    'asian':"{:.0%}".format(ny_povertydata[0][3])}
+
+    #RACE DATA
+    #for California
+    cur.execute("SELECT white, black, hispaniclatino, asian FROM Census WHERE stateid = 4")
+    ca_racedata = cur.fetchall()
+    ca_racestats = {'white':ca_racedata[0][0],'black':ca_racedata[0][1],
+                    'latino':ca_racedata[0][2], 'asian':ca_racedata[0][3]}
+
+    #for New York
+    cur.execute("SELECT white, black, hispaniclatino, asian FROM Census WHERE stateid = 32")
+    ny_racedata = cur.fetchall()
+    ny_racestats = {'white':ny_racedata[0][0],'black':ny_racedata[0][1],
+                    'latino':ny_racedata[0][2], 'asian':ny_racedata[0][3]}
+    
+    # calculations of poverty rate - 
+    ca_calc = {}
+    ny_calc={}
+    txt_str = []
+    for race in ca_povertystats.keys():
+        ca_pov = float(ca_povertystats[race].strip('%'))
+        ca_race = float(ca_racestats[race].strip('%'))
+        ca_calc[race] = round((ca_pov - ca_race),2)
+
+
+        ny_pov = float(ny_povertystats[race].strip('%'))
+        ny_race = float(ny_racestats[race].strip('%'))
+        ny_calc[race] = round((ny_pov - ny_race),2)
+        
+        #strings to write into file
+        ca_str = f"While {race} people in California make up {ca_race}% of the population, they make up {ca_pov}% of the state's poverty population. (Difference: {ca_calc[race]}%)"
+        ny_str = f"While {race} people in New York make up {ny_race}% of the population, they make up {ny_pov}% of the state's poverty population. (Difference: {ny_calc[race]}%)"
+
+
+        txt_str.append(ca_str)
+        txt_str.append(ny_str)
+    
+    with open(filename, 'w') as fileout:
+        for line in txt_str:
+            string = line.split(',')
+            fileout.write(string[0])
+            fileout.write('\n')
+            fileout.write(string[1])
+            fileout.write('\n\n')
+
 def main():
     #SET UP STATE IDS
-    states_dict = numbered_states()
+    """states_dict = numbered_states()
     all_state_ids = list(states_dict.keys())
     recentraceids = all_state_ids[:51]
     oldraceids = all_state_ids[51:102]
-    povertyids = all_state_ids[102:152]
+    povertyids = all_state_ids[102:152]"""
 
     #SCRAPE DATA INTO LISTS
-    poverty_data = poverty_data_from_csv(povertyids)
+    """poverty_data = poverty_data_from_csv(povertyids)
     recent_data = population_data_2020(recentraceids)
-    old_data = population_data_2018(oldraceids)
+    old_data = population_data_2018(oldraceids)"""
 
     #PUT DATA IN DATABASE
-    """cur, conn = setUpDatabase("main_data.db")
-    set_census_table(cur, conn)
+    cur, conn = setUpDatabase("main_data.db")
+    """set_census_table(cur, conn)
     set_states_table(cur, conn)
     add_states(cur, conn, states_dict)
     add_population_data(cur, conn, old_data, recent_data)
     add_poverty_data(cur, conn, poverty_data, povertyids)"""
 
     #CALCULATE DATA
+    write_calculations (cur, 'race_stats.txt')
 
     #VISUALIZATIONS
 
