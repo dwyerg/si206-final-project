@@ -3,6 +3,8 @@ import requests
 import csv
 import os
 import sqlite3
+import matplotlib.pyplot as plt
+import numpy as np
 
 """set up database"""
 def setUpDatabase(db_name):
@@ -287,7 +289,9 @@ def add_population_data(cur, conn, olddata, recentdata):
     conn.commit()
 
 """calculates difference between poverty and general population stats for each racial group (poverty% - population%)
-for California and New York (the 2 states with the most criminals) and writes the calculations into a txt file"""
+for California and New York (the 2 states with the most criminals) and writes the calculations into a txt file
+returns list of dicts to be used for visualizations
+list: [(ca race stats), (ca poverty stats), (ny race stats), (ny poverty stats)"""
 def write_calculations (cur, filename):
     #POVERTY DATA (not enough data for natives in these states)
     #for California
@@ -349,6 +353,44 @@ def write_calculations (cur, filename):
             fileout.write(string[1])
             fileout.write('\n\n')
 
+    out = []
+    out.append(ca_racestats)
+    out.append(ca_povertystats)
+    out.append(ny_racestats)
+    out.append(ny_povertystats)
+    return out
+
+"""takes in list of dictionaries with population and poverty stats from write_calculations and the state name
+makes bar chart comparing general population and poverty percentages for ethnic groups in the state
+saves the visualization as a png"""
+def createBarGraph(stats, statename): 
+    png_label = statename.replace(" ", "").lower() + "_chart.png"
+    groups = ['White', 'Black', 'Hispanic/Latino', 'Asian']
+    population = []
+    poverty = []
+
+    for percent in stats[0].values():
+        population.append(float(percent.strip('%')))
+
+    for percent in stats[1].values():
+        poverty.append(float(percent.strip('%')))
+
+    indices = np.arange(len(groups))
+    width = 0.20
+
+    plt.bar(indices + width, poverty, width=width, color ='darkgoldenrod', label ='Poverty')
+    plt.bar(indices, population, width=width, color ='darkseagreen', label ='Population')
+
+    plt.xticks(ticks=indices, labels=groups)
+    
+    plt.xlabel("Demographic")
+    plt.ylabel("Percent makeup")
+    plt.title(f"Population vs Poverty makeup in {statename}")
+
+    plt.legend()
+    plt.savefig(png_label)
+    plt.show()
+
 def main():
     cur, conn = setUpDatabase("main_data.db")
 
@@ -372,8 +414,13 @@ def main():
     add_poverty_data(cur, conn, poverty_data, povertyids)"""
 
     #CALCULATE DATA AND WRITE TO TXT FILE
-    """write_calculations (cur, 'race_stats.txt')"""
+    """ca_and_ny_stats = write_calculations (cur, 'race_stats.txt')"""
 
     #VISUALIZATIONS
+    """ca_stats = ca_and_ny_stats[:2]
+    ny_stats = ca_and_ny_stats[2:]
+
+    createBarGraph(ca_stats, "California")
+    createBarGraph(ny_stats, "New York")"""
 
 main()
