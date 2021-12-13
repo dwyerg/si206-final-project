@@ -4,8 +4,9 @@ import requests
 import json
 import re
 import os
-import csv
 import sqlite3
+import matplotlib.pyplot as plt
+
 
 def setUpDatabase(db_name):
     path = os.path.dirname(os.path.abspath(__file__))
@@ -85,7 +86,7 @@ def add_criminals(cur, conn, states):
 
     conn.commit()
 
-def get_field_offices(cur, conn):
+def get_field_offices(cur):
     cur.execute("SELECT field_office FROM Criminals")
     offices = cur.fetchall()
     field_offices = {}
@@ -105,7 +106,67 @@ def criminals_by_state(cur, conn, filename):
             else:
                 fileout.write(str(tot[0][0]) + ',' + str(len(tot)) + '\n')
 
+def pie_charts(cur, filename):
+    ca = "CA"
+    cur.execute("SELECT Census.asian, Census.black, Census.hispaniclatino, Census.native, Census.white FROM States JOIN Census ON States.stateid = Census.stateid WHERE States.abbreviation = ?", (ca,))
+    ca_raw_percentages = cur.fetchone()
+    ca_percentages = []
+    for percent in ca_raw_percentages:
+        ca_percentages.append(float(percent[:-1]))
+    labels = 'asian', 'black', 'hispanic', 'native', 'white'
+    colors = ['#03254c', '#1167b1', '#187bcd', '#2a9df4', '#d0efff']
+    fig1, ax1 = plt.subplots()
+    ax1.pie(ca_percentages, labels=labels, colors=colors, autopct='%1.1f%%')
+    plt.title("Racial Makeup of California")
 
+    ny = "NY"
+    cur.execute("SELECT Census.asian, Census.black, Census.hispaniclatino, Census.native, Census.white FROM States JOIN Census ON States.stateid = Census.stateid WHERE States.abbreviation = ?", (ny,))
+    ny_raw_percentages = cur.fetchone()
+    ny_percentages = []
+    for percent in ny_raw_percentages:
+        ny_percentages.append(float(percent[:-1]))
+    fig2, ax2 = plt.subplots()
+    ax2.pie(ny_percentages, labels=labels, colors=colors, autopct='%1.1f%%')
+    plt.title("Racial Makeup of New York")
+
+    cur.execute("SELECT Races.race FROM Criminals JOIN States ON States.stateid = Criminals.state JOIN Races ON Races.race_id = Criminals.race WHERE States.abbreviation = ?", (ca,))
+    ca_criminal_races = cur.fetchall()
+    ca_criminal_count = len(ca_criminal_races)
+    ca_race_count = {}
+    for criminal in ca_criminal_races:
+        if criminal[0] not in ca_race_count:
+            ca_race_count[criminal[0]] = 0
+        ca_race_count[criminal[0]] += 1
+    for race in ca_race_count.items():
+        percentage = round(race[1]/ca_criminal_count*100, 1)
+        ca_race_count[race[0]] = percentage
+    ca_race_count = dict(sorted(ca_race_count.items()))
+    ca_criminal_percentages = [0, 0] + list(ca_race_count.values())
+    ca_labels =  ['asian/black', ''] + list(ca_race_count.keys())
+    fig3, ax3 = plt.subplots()
+    ax3.pie(ca_criminal_percentages, labels=ca_labels, colors=colors, autopct='%1.1f%%')
+    plt.title("Criminal Racial Makeup of California")
+
+    cur.execute("SELECT Races.race FROM Criminals JOIN States ON States.stateid = Criminals.state JOIN Races ON Races.race_id = Criminals.race WHERE States.abbreviation = ?", (ny,))
+    ny_criminal_races = cur.fetchall()
+    ny_criminal_count = len(ny_criminal_races)
+    ny_race_count = {}
+    for criminal in ny_criminal_races:
+        if criminal[0] not in ny_race_count:
+            ny_race_count[criminal[0]] = 0
+        ny_race_count[criminal[0]] += 1
+    for race in ny_race_count.items():
+        percentage = round(race[1]/ny_criminal_count*100, 1)
+        ny_race_count[race[0]] = percentage
+    ny_race_count = dict(sorted(ny_race_count.items()))
+    ny_criminal_percentages = list(ny_race_count.values())[:3] + [0] + [list(ny_race_count.values())[-1]]
+    print(ny_criminal_percentages)
+    ny_labels =  list(ny_race_count.keys())[:3] + ['native'] + [list(ny_race_count.keys())[-1]]
+    print(ny_labels)
+    fig4, ax4 = plt.subplots()
+    ax4.pie(ny_criminal_percentages, labels=ny_labels, colors=colors, autopct='%1.1f%%')
+    plt.title("Criminal Racial Makeup of New York")
+    plt.show()
 
 
 def main():
@@ -115,9 +176,10 @@ def main():
     # create_criminal_table(cur, conn)
     # create_race_table(cur, conn)
     # add_criminals(cur, conn, states)
-    # get_field_offices(cur, conn)
+    # get_field_offices(cur)
 
-    criminals_by_state(cur, conn, 'criminals_by_state.txt')
+    # criminals_by_state(cur, conn, 'criminals_by_state.txt')
+    pie_charts(cur, 'criminals_by_state.txt')
 
 if __name__ == '__main__':
     main()
