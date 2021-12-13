@@ -1,0 +1,24 @@
+While white people in California make up 34.7% of the population
+ they make up 8.0% of the state's poverty population. (Difference: -26.7%)
+
+While white people in New York make up 52.5% of the population
+ they make up 8.0% of the state's poverty population. (Difference: -44.5%)
+
+While black people in California make up 5.7% of the population
+ they make up 15.0% of the state's poverty population. (Difference: 9.3%)
+
+While black people in New York make up 14.8% of the population
+ they make up 16.0% of the state's poverty population. (Difference: 1.2%)
+
+While latino people in California make up 39.4% of the population
+ they make up 15.0% of the state's poverty population. (Difference: -24.4%)
+
+While latino people in New York make up 19.5% of the population
+ they make up 22.0% of the state's poverty population. (Difference: 2.5%)
+
+While asian people in California make up 15.8% of the population
+ they make up 8.0% of the state's poverty population. (Difference: -7.8%)
+
+While asian people in New York make up 9.7% of the population
+ they make up 8.0% of the state's poverty population. (Difference: -1.7%)
+
