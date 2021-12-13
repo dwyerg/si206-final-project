@@ -364,7 +364,6 @@ def write_calculations (cur, filename):
 makes bar chart comparing general population and poverty percentages for ethnic groups in the state
 saves the visualization as a png"""
 def createBarGraph(stats, statename): 
-    png_label = statename.replace(" ", "").lower() + "_chart.png"
     groups = ['White', 'Black', 'Hispanic/Latino', 'Asian']
     population = []
     poverty = []
@@ -388,7 +387,6 @@ def createBarGraph(stats, statename):
     plt.title(f"Population vs Poverty makeup in {statename}")
 
     plt.legend()
-    plt.savefig(png_label)
     plt.show()
 
 def main():
