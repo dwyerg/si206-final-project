@@ -86,15 +86,6 @@ def add_criminals(cur, conn, states):
 
     conn.commit()
 
-def get_field_offices(cur):
-    cur.execute("SELECT field_office FROM Criminals")
-    offices = cur.fetchall()
-    field_offices = {}
-    for office in offices:
-        if office not in field_offices:
-            field_offices[office[0]] = ""
-    return field_offices
-
 def criminals_by_state(cur, conn, filename):
     with open(filename, 'w') as fileout:
         fileout.write('STATE_ABBREVIATION,TOTAL_CRIMINALS\n')
@@ -106,7 +97,7 @@ def criminals_by_state(cur, conn, filename):
             else:
                 fileout.write(str(tot[0][0]) + ',' + str(len(tot)) + '\n')
 
-def pie_charts(cur, filename):
+def pie_charts(cur):
     ca = "CA"
     cur.execute("SELECT Census.asian, Census.black, Census.hispaniclatino, Census.native, Census.white FROM States JOIN Census ON States.stateid = Census.stateid WHERE States.abbreviation = ?", (ca,))
     ca_raw_percentages = cur.fetchone()
@@ -160,26 +151,42 @@ def pie_charts(cur, filename):
         ny_race_count[race[0]] = percentage
     ny_race_count = dict(sorted(ny_race_count.items()))
     ny_criminal_percentages = list(ny_race_count.values())[:3] + [0] + [list(ny_race_count.values())[-1]]
-    print(ny_criminal_percentages)
     ny_labels =  list(ny_race_count.keys())[:3] + ['native'] + [list(ny_race_count.keys())[-1]]
-    print(ny_labels)
     fig4, ax4 = plt.subplots()
     ax4.pie(ny_criminal_percentages, labels=ny_labels, colors=colors, autopct='%1.1f%%')
     plt.title("Criminal Racial Makeup of New York")
     plt.show()
 
+def get_field_offices(cur):
+    cur.execute("SELECT field_office FROM Criminals")
+    offices = cur.fetchall()
+    field_offices = {}
+    for office in offices:
+        if office not in field_offices:
+            field_offices[office[0]] = ""
+    return field_offices
 
 def main():
-    cur, conn = setUpDatabase("main_data.db")
-    # states = {'washingtondc': 'DC', 'tampa': 'FL', 'philadelphia': 'PA', 'jacksonville': 'FL', 'albuquerque': 'NM', 'losangeles': 'CA', 'miami': 'FL', 'sanjuan': 'UT', 'cleveland': 'OH', 'newhaven': 'CT', 'seattle': 'WA', 'cincinnati': 'OH', 'portland': 'OR', 'phoenix': 'AZ', 'dallas': 'TX', 'minneapolis': 'MN', 'chicago': 'IL', 'newark': 'NJ', 'sanfrancisco': 'CA', 'newyork': 'NY', 'sacramento': 'CA', 'saltlakecity': 'UT', 'lasvegas': 'NV', 'louisville': 'KY', 'boston': 'MA', 'houston': 'TX', 'omaha': 'NE', 'pittsburgh': 'PA', 'atlanta': 'GA', 'columbia': 'SC', 'albany': 'NY', 'kansascity': 'KS', 'denver': 'CO', 'mobile': 'AL', 'buffalo': 'NY', 'elpaso': 'TX', 'littlerock': 'AR', 'sandiego': 'CA', 'detroit': 'MI', 'milwaukee': 'WI', 'richmond': 'VA', 'baltimore': 'MD', 'neworleans': 'LA', 'charlotte': 'NC', 'indianapolis': 'IN', 'oklahomacity': 'OK', 'norfolk': 'VA', 'stlouis': 'MO', 'knoxville': 'TN', 'birmingham': 'AL', 'springfield': 'OR', 'memphis': 'TN', 'jackson': 'MS', 'honolulu': 'HI', 'sanantonio': 'TX'}
-    # cur.execute("DROP TABLE Criminals")
+    """SET UP THE DATABASE"""
+    # cur, conn = setUpDatabase("main_data.db")
+
+    """CREATE THE CRIMINAL AND RACE TABLES"""
     # create_criminal_table(cur, conn)
     # create_race_table(cur, conn)
-    # add_criminals(cur, conn, states)
-    # get_field_offices(cur)
 
+    """ADD CRIMINAL DATA TO THE DATABASE
+            due to the formatting of the FBI data,
+            we had to hardcode the locations to the states they are within,
+            and in doing so I needed the intial list of field_offices"""
+    # get_field_offices(cur)
+    # states = {'washingtondc': 'DC', 'tampa': 'FL', 'philadelphia': 'PA', 'jacksonville': 'FL', 'albuquerque': 'NM', 'losangeles': 'CA', 'miami': 'FL', 'sanjuan': 'UT', 'cleveland': 'OH', 'newhaven': 'CT', 'seattle': 'WA', 'cincinnati': 'OH', 'portland': 'OR', 'phoenix': 'AZ', 'dallas': 'TX', 'minneapolis': 'MN', 'chicago': 'IL', 'newark': 'NJ', 'sanfrancisco': 'CA', 'newyork': 'NY', 'sacramento': 'CA', 'saltlakecity': 'UT', 'lasvegas': 'NV', 'louisville': 'KY', 'boston': 'MA', 'houston': 'TX', 'omaha': 'NE', 'pittsburgh': 'PA', 'atlanta': 'GA', 'columbia': 'SC', 'albany': 'NY', 'kansascity': 'KS', 'denver': 'CO', 'mobile': 'AL', 'buffalo': 'NY', 'elpaso': 'TX', 'littlerock': 'AR', 'sandiego': 'CA', 'detroit': 'MI', 'milwaukee': 'WI', 'richmond': 'VA', 'baltimore': 'MD', 'neworleans': 'LA', 'charlotte': 'NC', 'indianapolis': 'IN', 'oklahomacity': 'OK', 'norfolk': 'VA', 'stlouis': 'MO', 'knoxville': 'TN', 'birmingham': 'AL', 'springfield': 'OR', 'memphis': 'TN', 'jackson': 'MS', 'honolulu': 'HI', 'sanantonio': 'TX'}
+    # add_criminals(cur, conn, states)
+    
+    """CALCULATE NUMBER OF CRIMINALS BY STATE"""
     # criminals_by_state(cur, conn, 'criminals_by_state.txt')
-    pie_charts(cur, 'criminals_by_state.txt')
+
+    """CREATE VISUALIZATIONS"""
+    # pie_charts(cur)
 
 if __name__ == '__main__':
     main()
